@@ -18,7 +18,7 @@ export const authVerificationEmailWorker = defineWorker(config, async (job) => {
   const { email, token } = job.data;
   const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   const confirmLink = `${baseUrl}/verify-email/${token}`;
-
+  console.log(`link is ${confirmLink}`)
   const html = await render(
     AccountVerificationEmail({
       verifyLink: confirmLink,
@@ -27,7 +27,8 @@ export const authVerificationEmailWorker = defineWorker(config, async (job) => {
 
   await sendMail({
     to: email,
-    subject: "Confirm your email",
+    subject: "Confirm your email sucker",
     html,
   });
+  console.log( `sendmails complete`)
 });

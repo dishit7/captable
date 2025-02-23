@@ -5,8 +5,20 @@ import { RiGoogleFill as GoogleIcon } from "@remixicon/react";
 import { signIn } from "next-auth/react";
 
 async function signInWithGoogle() {
-  await signIn("google", { callbackUrl: "/onboarding" });
+  try {
+    console.log("Attempting Google sign-in...");
+    const result = await signIn("google", { callbackUrl: "/onboarding" });
+
+    if (result?.error) {
+      console.error("Sign-in error:", result.error);
+    } else {
+      console.log("Sign-in successful:", result);
+    }
+  } catch (error) {
+    console.error("Unexpected error during sign-in:", error);
+  }
 }
+
 
 const LoginWithGoogle = () => {
   return (

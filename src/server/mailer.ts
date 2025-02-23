@@ -2,31 +2,54 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-
 import { env } from "@/env";
 import { type SendMailOptions, createTransport } from "nodemailer";
 
 const getTransport = () => {
-  return createTransport({
-    url: env.EMAIL_SERVER,
+  // Create transport with explicit Gmail SMTP config
+  const transport = createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+      user: env.GMAIL_USER,
+      pass: env.GMAIL_APP_PASSWORD
+    },
+    debug: true
   });
+
+  // Test the connection
+  transport.verify((error, success) => {
+    if (error) {
+      console.error('SMTP connection error:', error);
+    } else {
+      console.log('SMTP connection successful');
+    }
+  });
+
+  return transport;
 };
 
-type RecordType = Record<string, string | undefined>;
+export const sendMail = async (options: Omit<SendMailOptions, "from">) => {
+  try {
+    const transport = getTransport();
+    
+    const mailOptions = {
+      from: env.EMAIL_FROM,
+      ...options,
+    };
 
-export const sendMail = (options: Omit<SendMailOptions, "from">) => {
-  let from = `Captable <${env.EMAIL_FROM}>`;
-  const headers = (options.headers || {}) as RecordType;
+    console.log('Sending email with options:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject
+    });
 
-  const senderName = headers["X-From-Name"];
-
-  if (senderName) {
-    from = `${senderName} <${env.EMAIL_FROM}>`;
+    const info = await transport.sendMail(mailOptions);
+    console.log('Email sent successfully:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Failed to send email:', error);
+    throw error;
   }
-
-  const transport = getTransport();
-  return transport.sendMail({
-    from,
-    ...options,
-  });
 };

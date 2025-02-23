@@ -54,18 +54,24 @@ const SignInForm = ({ isGoogleAuthEnabled }: LoginFormProps) => {
   const isSubmitting = form.formState.isSubmitting;
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
-    const email = values.email;
-    const password = values.password;
-    const result = await signIn("credentials", {
-      email,
-      password,
-      callbackUrl: "/onboarding",
-    });
+  console.log("Submitting login form with values:", values);
 
-    if (result?.error) {
-      toast.error("Incorrect email or password");
-    }
+  const result = await signIn("credentials", {
+    email: values.email,
+    password: values.password,
+    callbackUrl: "/onboarding",
+    redirect: false,
+  });
+
+  console.log("Sign-in result:", result);
+
+  if (result?.error) {
+    console.error("Login error:", result.error);
+    toast.error("Incorrect email or password");
+  } else {
+    console.log("Redirecting to:", result?.url);
   }
+}
 
   const onSignInWithPasskey = async () => {
     if (!browserSupportsWebAuthn()) {

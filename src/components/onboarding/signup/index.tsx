@@ -53,18 +53,25 @@ const SignUpForm = ({ isGoogleAuthEnabled }: SignUpFormProps) => {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof ZSignUpFormSchema>) {
-    try {
-      await mutateAsync(values);
-      router.replace(`/check-email?email=${values.email}`);
-    } catch (err) {
-      console.error(err);
-    }
+async function onSubmit(values: z.infer<typeof ZSignUpFormSchema>) {
+  try {
+    console.log("Form submitted:", values);  // Log the form data being submitted
+    await mutateAsync(values);
+    console.log("Signup successful, redirecting...");
+    router.replace(`/check-email?email=${values.email}`);
+  } catch (err) {
+    console.error("Signup failed:", err);  // Log the error if any
+    toast.error(`🔥 Error - ${err.message}`);
   }
+}
 
-  async function signInWithGoogle() {
-    await signIn("google", { callbackUrl: "/onboarding" });
-  }
+
+async function signInWithGoogle() {
+  console.log("Google Sign In initiated");
+  await signIn("google", { callbackUrl: "/onboarding" });
+  console.log("Google Sign In complete");
+}
+
   const isSubmitting = form.formState.isSubmitting;
 
   return (
